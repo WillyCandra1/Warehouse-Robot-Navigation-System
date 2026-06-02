@@ -250,7 +250,7 @@ int main() {
             case 1: orderMenu(orderManager); break;
             case 2: navigationMenu(navigation); break;
             case 3: robotAssignmentMenu(assignment); break;
-            case 4: itemManagementMenu(itemMgr); break; // Calling Task 4 Menu
+            case 4: itemManagementMenu(itemMgr); break; 
             case 0: 
                 cout << "\nSaving data and exiting system...\n"; 
                 itemMgr.saveItemsToCSV("../data/items.csv");
@@ -268,7 +268,9 @@ void itemManagementMenu(ItemManager& itemMgr) {
     string id, name, location;
 
     do {
-        cout << "\n--- Item Management Menu ---\n";
+        cout << "\n====================================\n";
+        cout << "        Item Management Menu         \n";
+        cout << "\n====================================\n";
         cout << "1. Display All Items (Sorted by ID)\n";
         cout << "2. Search Item by ID\n";
         cout << "3. Search Item by Name\n";

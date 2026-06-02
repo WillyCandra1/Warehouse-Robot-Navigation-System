@@ -2,17 +2,15 @@
 
 using namespace std;
 
-// Constructor initializes an empty tree
 ItemManager::ItemManager() {
     root = nullptr;
 }
 
-// Destructor
 ItemManager::~ItemManager() {
-    // TODO: Add a recursive delete function to free memory when the program closes
+    while (root != nullptr) {
+        root = deleteRecursive(root, root->data.itemID);
+    }
 }
-
-// --- PRIVATE RECURSIVE HELPERS ---
 
 ItemNode* ItemManager::insertRecursive(ItemNode* node, Item newItem) {
     if (node == nullptr) {
@@ -49,19 +47,15 @@ void ItemManager::displayInOrder(ItemNode* node) {
     }
 }
 
-// Helper to write the tree back to a CSV file in sorted order
 void ItemManager::saveInOrder(ItemNode* node, ofstream& outFile) {
     if (node != nullptr) {
         saveInOrder(node->left, outFile);
-        // Write as comma-separated values
         outFile << node->data.itemID << "," 
                 << node->data.itemName << "," 
                 << node->data.location << "\n";
         saveInOrder(node->right, outFile);
     }
 }
-
-// --- PUBLIC METHODS ---
 
 void ItemManager::insertItem(string id, string name, string location) {
     Item newItem;
@@ -84,12 +78,10 @@ void ItemManager::displaySortedItems() {
         cout << "The item database is currently empty." << endl;
         return;
     }
-    cout << "--- Warehouse Item List (Sorted by ID) ---" << endl;
+    cout << "=== Warehouse Item List (Sorted by ID) ===" << endl;
     displayInOrder(root);
-    cout << "------------------------------------------" << endl;
+    cout << "==========================================" << endl;
 }
-
-// --- FILE I/O METHODS ---
 
 void ItemManager::loadItemsFromCSV(string filename) {
     ifstream inFile(filename);
@@ -99,12 +91,9 @@ void ItemManager::loadItemsFromCSV(string filename) {
     }
 
     string line, id, name, location;
-    // Read the file line by line
     while (getline(inFile, line)) {
         stringstream ss(line);
-        // Split the line by commas
         if (getline(ss, id, ',') && getline(ss, name, ',') && getline(ss, location, ',')) {
-            // Insert the item into our Binary Search Tree
             insertItem(id, name, location);
         }
     }
@@ -119,19 +108,13 @@ void ItemManager::saveItemsToCSV(string filename) {
         return;
     }
 
-    // Call the recursive save helper starting from the root
     saveInOrder(root, outFile);
     
     outFile.close();
     cout << "Successfully saved all items to " << filename << "." << endl;
 }
 
-// ==========================================
-// --- PHASE 4: UPDATE, DELETE & SEARCH BY NAME ---
-// ==========================================
-
 bool ItemManager::updateItemLocation(string id, string newLocation) {
-    // We can reuse our fast O(log n) search!
     Item* itemToUpdate = searchItemByID(id);
     
     if (itemToUpdate != nullptr) {
@@ -144,7 +127,6 @@ bool ItemManager::updateItemLocation(string id, string newLocation) {
     }
 }
 
-// Helper to find the node with the minimum value (leftmost node)
 ItemNode* ItemManager::findMin(ItemNode* node) {
     while (node && node->left != nullptr) {
         node = node->left;
@@ -153,10 +135,8 @@ ItemNode* ItemManager::findMin(ItemNode* node) {
 }
 
 ItemNode* ItemManager::deleteRecursive(ItemNode* node, string id) {
-    // Base case: item not found
     if (node == nullptr) return node;
 
-    // Traverse down the tree to find the node
     if (id < node->data.itemID) {
         node->left = deleteRecursive(node->left, id);
     } 
@@ -164,10 +144,6 @@ ItemNode* ItemManager::deleteRecursive(ItemNode* node, string id) {
         node->right = deleteRecursive(node->right, id);
     } 
     else {
-        // We found the node to delete!
-        
-        // Case 1: Node has NO children (Leaf node)
-        // Case 2: Node has exactly ONE child
         if (node->left == nullptr) {
             ItemNode* temp = node->right;
             delete node;
@@ -179,21 +155,14 @@ ItemNode* ItemManager::deleteRecursive(ItemNode* node, string id) {
             return temp;
         }
 
-        // Case 3: Node has TWO children
-        // Get the inorder successor (smallest node in the right subtree)
         ItemNode* temp = findMin(node->right);
-        
-        // Copy the inorder successor's data to this node
         node->data = temp->data;
-        
-        // Delete the original inorder successor
         node->right = deleteRecursive(node->right, temp->data.itemID);
     }
     return node;
 }
 
 void ItemManager::deleteItem(string id) {
-    // To ensure we only print "deleted" if it actually existed, check first
     if (searchItemByID(id) == nullptr) {
         cout << "Cannot delete. Item ID " << id << " does not exist." << endl;
         return;
@@ -203,11 +172,9 @@ void ItemManager::deleteItem(string id) {
     cout << "Item " << id << " successfully deleted." << endl;
 }
 
-// Since the tree is sorted by ID, searching by NAME requires checking every node (O(n))
 void ItemManager::searchByNameRecursive(ItemNode* node, string name, bool& found) {
     if (node == nullptr) return;
 
-    // In-order traversal to search
     searchByNameRecursive(node->left, name, found);
     
     if (node->data.itemName == name) {
@@ -221,13 +188,12 @@ void ItemManager::searchByNameRecursive(ItemNode* node, string name, bool& found
 }
 
 void ItemManager::searchItemByName(string name) {
-    cout << "--- Search Results for '" << name << "' ---" << endl;
+    cout << "=== Search Results for '" << name << "' ===" << endl;
     bool found = false;
     searchByNameRecursive(root, name, found);
     
     if (!found) {
         cout << "No items found matching that name." << endl;
     }
-    cout << "---------------------------------------" << endl;
+    cout << "=======================================" << endl;
 }
-
