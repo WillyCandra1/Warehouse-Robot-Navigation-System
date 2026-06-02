@@ -119,9 +119,7 @@ void WarehouseGraph::displayLayout() {
         return;
     }
 
-    cout << "\n=================== Warehouse Layout Map ===================\n";
-    cout << "Each location shows its floor position (X,Y) and the paths\n";
-    cout << "leading out of it. A path reads as  destination(distance).\n";
+    cout << "\n=================== Warehouse Layout Map ===================";
 
     string types[4] = {"DOCK", "ZONE", "AISLE", "SHELF"};
     string titles[4] = {"Packing Dock", "Zones", "Aisles", "Shelves"};

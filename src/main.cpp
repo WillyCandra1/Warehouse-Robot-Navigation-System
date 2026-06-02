@@ -423,7 +423,7 @@ void warehouseLayoutMenu(WarehouseGraph& layout, navigationSystem& navigation) {
                 break;
 
             case 2: {
-                string id = readWord("Enter location ID (e.g. A1 or SB2): ");
+                string id = readWord("Enter location ID (e.g. A1, SB1, DOCK1, ZA): ");
                 for (char& c : id) c = toupper(c);
                 if (!validLocationId(id)) {
                     cout << "Invalid ID. Use letters and digits only, starting with a letter (e.g. A1).\n";
@@ -460,8 +460,7 @@ void warehouseLayoutMenu(WarehouseGraph& layout, navigationSystem& navigation) {
                 else type = "DOCK";
 
                 cout << "\nGrid position is where the location sits on the warehouse floor map.\n";
-                cout << "  X = column (left to right), Y = row (0 is the back wall,\n";
-                cout << "  a larger Y is closer to the dock). Example: the dock is at X=0, Y=4.\n";
+                cout << "  X = column, Y = row\n";
                 int x = readInt("Enter grid X: ");
                 int y = readInt("Enter grid Y: ");
                 if (x < 0 || y < 0) {
