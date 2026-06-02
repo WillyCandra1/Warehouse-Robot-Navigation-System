@@ -215,10 +215,88 @@ void navigationMenu(navigationSystem& navigation) {
     } while (choice != 0);
 }
 
+void itemManagementMenu(ItemManager& itemMgr) {
+    int choice = 0;
+    string id, name, location;
+
+    do {
+        cout << "\n====================================\n";
+        cout << "        Item Management Menu         \n";
+        cout << "\n====================================\n";
+        cout << "1. Display All Items (Sorted by ID)\n";
+        cout << "2. Search Item by ID\n";
+        cout << "3. Search Item by Name\n";
+        cout << "4. Add New Item\n";
+        cout << "5. Update Item Location\n";
+        cout << "0. Back to Main Menu\n";
+        cout << "====================================\n";
+        cout << "Enter choice: ";
+        
+        cin >> choice;
+        
+        if (cin.fail()) {
+            if (cin.eof()) {
+                break;
+            }
+            cin.clear();
+            cin.ignore(1000, '\n');
+            cout << "Invalid input. Please enter numbers only.\n";
+            choice = -1;
+        }
+
+        switch (choice) {
+            case 1:
+                itemMgr.displaySortedItems();
+                break;
+            case 2:
+                cout << "Enter Item ID to search: ";
+                cin >> id;
+                {
+                    Item* found = itemMgr.searchItemByID(id);
+                    if (found) {
+                        cout << "Found: " << found->itemName << " at " << found->location << endl;
+                    } 
+                    
+                    else {
+                        cout << "Item not found." << endl;
+                    }
+                }
+                break;
+            case 3:
+                cout << "Enter Item Name to search: ";
+                cin >> ws; // clear input buffer
+                getline(cin, name);
+                itemMgr.searchItemByName(name);
+                break;
+            case 4:
+                cout << "Enter New Item ID: "; cin >> id;
+                cout << "Enter Name: "; cin >> ws; getline(cin, name);
+                cout << "Enter Location: "; cin >> location;
+                itemMgr.insertItem(id, name, location);
+                cout << "Item added." << endl;
+                break;
+            case 5:
+                cout << "Enter Item ID to update: "; cin >> id;
+                cout << "Enter New Location: "; cin >> location;
+                itemMgr.updateItemLocation(id, location);
+                break;
+            case 0:
+                cout << "Returning to Main Menu...\n";
+                break;
+            default:
+                if (choice != -1) {
+                    cout << "Invalid choice.\n";
+                }
+        }
+    } while (choice != 0);
+}
+
+
+
 int main() {
     OrderManager orderManager;
     navigationSystem navigation;
-    ItemManager itemMgr; // Task 4 Initialization
+    ItemManager itemMgr;
     RobotAssignment assignment;
     int choice;
 
@@ -247,10 +325,14 @@ int main() {
         }
 
         switch (choice) {
-            case 1: orderMenu(orderManager); break;
-            case 2: navigationMenu(navigation); break;
-            case 3: robotAssignmentMenu(assignment); break;
-            case 4: itemManagementMenu(itemMgr); break; 
+            case 1: 
+                orderMenu(orderManager); break;
+            case 2: 
+                navigationMenu(navigation); break;
+            case 3: 
+                robotAssignmentMenu(assignment); break;
+            case 4: 
+                itemManagementMenu(itemMgr); break; 
             case 0: 
                 cout << "\nSaving data and exiting system...\n"; 
                 itemMgr.saveItemsToCSV("../data/items.csv");
@@ -262,69 +344,3 @@ int main() {
     return 0;
 }
 
-// Sub-menu specifically for Task 4
-void itemManagementMenu(ItemManager& itemMgr) {
-    int choice = 0;
-    string id, name, location;
-
-    do {
-        cout << "\n====================================\n";
-        cout << "        Item Management Menu         \n";
-        cout << "\n====================================\n";
-        cout << "1. Display All Items (Sorted by ID)\n";
-        cout << "2. Search Item by ID\n";
-        cout << "3. Search Item by Name\n";
-        cout << "4. Add New Item\n";
-        cout << "5. Update Item Location\n";
-        cout << "0. Back to Main Menu\n";
-        cout << "Enter choice: ";
-        
-        cin >> choice;
-        
-        if (cin.fail()) {
-            if (cin.eof()) break;
-            cin.clear(); cin.ignore(10000, '\n'); choice = -1;
-        }
-
-        switch (choice) {
-            case 1:
-                itemMgr.displaySortedItems();
-                break;
-            case 2:
-                cout << "Enter Item ID to search: ";
-                cin >> id;
-                {
-                    Item* found = itemMgr.searchItemByID(id);
-                    if (found) {
-                        cout << "Found: " << found->itemName << " at " << found->location << endl;
-                    } else {
-                        cout << "Item not found." << endl;
-                    }
-                }
-                break;
-            case 3:
-                cout << "Enter Item Name to search: ";
-                cin >> ws; // clear input buffer
-                getline(cin, name);
-                itemMgr.searchItemByName(name);
-                break;
-            case 4:
-                cout << "Enter New Item ID: "; cin >> id;
-                cout << "Enter Name: "; cin >> ws; getline(cin, name);
-                cout << "Enter Location: "; cin >> location;
-                itemMgr.insertItem(id, name, location);
-                cout << "Item added." << endl;
-                break;
-            case 5:
-                cout << "Enter Item ID to update: "; cin >> id;
-                cout << "Enter New Location: "; cin >> location;
-                itemMgr.updateItemLocation(id, location);
-                break;
-            case 0:
-                cout << "Returning to Main Menu...\n";
-                break;
-            default:
-                if (choice != -1) cout << "Invalid choice.\n";
-        }
-    } while (choice != 0);
-}

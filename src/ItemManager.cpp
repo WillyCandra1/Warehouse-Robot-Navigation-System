@@ -19,10 +19,12 @@ ItemNode* ItemManager::insertRecursive(ItemNode* node, Item newItem) {
 
     if (newItem.itemID < node->data.itemID) {
         node->left = insertRecursive(node->left, newItem);
-    } 
+    }
+
     else if (newItem.itemID > node->data.itemID) {
         node->right = insertRecursive(node->right, newItem);
     }
+
     return node;
 }
 
@@ -34,6 +36,7 @@ ItemNode* ItemManager::searchRecursive(ItemNode* node, string id) {
     if (node->data.itemID < id) {
         return searchRecursive(node->right, id);
     }
+    
     return searchRecursive(node->left, id);
 }
 
@@ -78,7 +81,7 @@ void ItemManager::displaySortedItems() {
         cout << "The item database is currently empty." << endl;
         return;
     }
-    cout << "=== Warehouse Item List (Sorted by ID) ===" << endl;
+    cout << "   Warehouse Item List (Sorted by ID)    " << endl;
     displayInOrder(root);
     cout << "==========================================" << endl;
 }
