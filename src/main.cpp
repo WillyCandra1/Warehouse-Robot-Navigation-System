@@ -29,6 +29,7 @@ void orderMenu(OrderManager& orderManager) {
         cout << "5. Show completed orders\n";
         cout << "6. Show order summary\n";
         cout << "0. Back to main menu\n";
+        cout << "====================================\n";
         cout << "Enter choice: ";
         cin >> choice;
 
@@ -77,6 +78,7 @@ void robotAssignmentMenu(RobotAssignment& assignment) {
         cout << "6. Set robot to maintenance" << endl;
         cout << "7. Set robot to available" << endl;
         cout << "0. Back to main menu" << endl;
+        cout << "===========================" << endl;
         cout << "Enter choice: ";
         cin >> choice;
 
@@ -191,6 +193,7 @@ void navigationMenu(navigationSystem& navigation) {
         cout << "5. Return to base\n";
         cout << "6. Show summary\n";
         cout << "0. Back to main menu\n";
+        cout << "====================================\n";
         cout << "Enter choice: ";
         cin >> choice;
 
@@ -449,6 +452,7 @@ void warehouseLayoutMenu(WarehouseGraph& layout, navigationSystem& navigation, R
         cout << "5. Traverse all sections\n";
         cout << "6. Dispatch a robot to a location\n";
         cout << "0. Back to main menu\n";
+        cout << "=====================================\n";
         choice = readInt("Enter choice: ");
 
         if (choice > 0) {
@@ -610,6 +614,7 @@ int main() {
         cout << "4. Item Management (Task 4)\n";
         cout << "5. Warehouse Layout (Task 5)\n";
         cout << "0. Exit\n";
+        cout << "====================================\n";
         cout << "Enter choice: ";
         cin >> choice;
 
