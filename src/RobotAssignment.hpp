@@ -20,6 +20,8 @@ public:
     void completeTask(string robotID);
     void setMaintenance(string robotID);
     void setAvailable(string robotID);
+    void loadRobotsFromCSV(string filename);
+    void saveRobotsToCSV(string filename);
     bool isEmpty();
     bool robotExists(string robotID);
     ~RobotAssignment();

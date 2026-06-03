@@ -1,0 +1,4 @@
+RobotID,CurrentTask,Status
+R01,Cleaning,Busy
+R02,Cooking,Busy
+R03,Packing,Busy

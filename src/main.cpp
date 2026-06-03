@@ -599,8 +599,9 @@ int main() {
     int choice;
 
     clearScreen();
-    cout << "Loading Item Database...\n";
+    cout << "Loading Databases...\n";
     itemMgr.loadItemsFromCSV("../data/item.csv");
+    assignment.loadRobotsFromCSV("../data/robots.csv");
     layout.loadFromCSV("../data/layout.csv");
 
     do {
@@ -645,6 +646,7 @@ int main() {
             case 0: 
                 cout << "\nSaving data and exiting system...\n"; 
                 itemMgr.saveItemsToCSV("../data/item.csv");
+                assignment.saveRobotsToCSV("../data/robots.csv");
                 layout.saveToCSV("../data/layout.csv");
                 break;
             default: cout << "\nInvalid choice. Try again.\n";

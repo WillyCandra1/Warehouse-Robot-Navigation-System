@@ -1,6 +1,8 @@
 #include "RobotAssignment.hpp"
 #include <iostream>
 #include <iomanip>
+#include <fstream>
+#include <sstream>
 using namespace std;
 
 RobotAssignment::RobotAssignment() {
@@ -20,6 +22,7 @@ void RobotAssignment::addRobot(Robot robot) {
         rear = node;
     }
     size++;
+    cout << "Robot " << robot.robotID << " added successfully." << endl;
 }
 
 void RobotAssignment::assignNext(string task) {
@@ -50,7 +53,7 @@ void RobotAssignment::displayStatus() {
     RobotNode* current = rear->next;
     cout << setfill('=') << setw(50) << "" << setfill(' ') << endl;
     cout << left << setw(15) << "Robot ID" << setw(20) << "Current Task" << setw(15) << "Status" << endl;
-    cout << string(50, '-') << endl;
+    cout << string(50, '=') << endl;
     do {
         cout << left << setw(15) << current->data.robotID 
              << setw(20) << (current->data.currentTask.empty() ? "None" : current->data.currentTask) 
@@ -140,6 +143,50 @@ void RobotAssignment::completeTask(string robotID) {
         current = current->next;
     } while (current != rear->next);
     cout << "Robot with ID " << robotID << " not found!" << endl;
+}
+
+void RobotAssignment::loadRobotsFromCSV(string filename) {
+    ifstream inFile(filename);
+    if (!inFile) {
+        cout << "Error opening file: " << filename << endl;
+        return;
+    }
+    string line;
+    getline(inFile, line);
+
+    while (getline(inFile, line)) {
+        stringstream ss(line);
+        string robotID, currentTask, status;
+        if (getline(ss, robotID, ',') && getline(ss, currentTask, ',') && getline(ss, status)) {
+            Robot robot;
+            robot.robotID = robotID;
+            robot.currentTask = currentTask;
+            robot.status = status;
+            addRobot(robot);
+        }
+    }
+    inFile.close();
+}
+
+void RobotAssignment::saveRobotsToCSV(string filename) {
+    ofstream outFile(filename);
+    if (!outFile) {
+        cout << "Error opening file: " << filename << endl;
+        return;
+    }
+    outFile << "RobotID,CurrentTask,Status" << endl;
+    if (rear == nullptr) {
+        outFile << "No robots found in the system!" << endl;
+        outFile.close();
+        return;
+    }
+    RobotNode* current = rear->next;
+    do {
+        outFile << current->data.robotID << "," << current->data.currentTask << "," << current->data.status << endl;
+        current = current->next;
+    } while (current != rear->next);
+    outFile.close();
+    cout << "Robots are saved to " << filename << "." << endl;
 }
 
 bool RobotAssignment::isEmpty() {
