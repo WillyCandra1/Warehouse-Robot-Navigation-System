@@ -1,4 +1,5 @@
 #include "ItemManager.hpp"
+#include "WarehouseGraph.hpp"
 #include <iomanip>
 
 using namespace std;
@@ -82,7 +83,9 @@ Item* ItemManager::searchItemByID(string id) {
     if (result != nullptr) {
         return &(result->data); 
     }
-    return nullptr;
+    else {
+        return nullptr;
+    }
 }
 
 // display all items in sorted order by ID
@@ -111,6 +114,9 @@ void ItemManager::loadItemsFromCSV(string filename) {
     }
 
     string line, id, name, location;
+    // Skip the header row
+    getline(inFile, line);
+
     while (getline(inFile, line)) {
         stringstream ss(line);
         if (getline(ss, id, ',') && getline(ss, name, ',') && getline(ss, location, ',')) {
@@ -118,10 +124,9 @@ void ItemManager::loadItemsFromCSV(string filename) {
         }
     }
     inFile.close();
-    cout << "Successfully loaded items from " << filename << " into the tree." << endl;
+    cout << "Successfully finished loading items from " << filename << "." << endl;
 }
 
-// save items from the BST back to a CSV file
 void ItemManager::saveItemsToCSV(string filename) {
     ofstream outFile(filename);
     if (!outFile.is_open()) {
@@ -129,8 +134,11 @@ void ItemManager::saveItemsToCSV(string filename) {
         return;
     }
 
+    // Write the header row
+    outFile << "ItemID,ItemName,Location\n";
+
     saveInOrder(root, outFile);
-    
+
     outFile.close();
     cout << "Successfully saved all items to " << filename << "." << endl;
 }
@@ -159,7 +167,9 @@ ItemNode* ItemManager::findMin(ItemNode* node) {
 
 // delete an item in the tree
 ItemNode* ItemManager::deleteRecursive(ItemNode* node, string id) {
-    if (node == nullptr) return node;
+    if (node == nullptr) {
+        return node;
+    }
 
     if (id < node->data.itemID) {
         node->left = deleteRecursive(node->left, id);
@@ -199,7 +209,9 @@ void ItemManager::deleteItem(string id) {
 
 // search for items by name in tree
 void ItemManager::searchByNameRecursive(ItemNode* node, string name, bool& found) {
-    if (node == nullptr) return;
+    if (node == nullptr) {
+        return;
+    }
 
     searchByNameRecursive(node->left, name, found);
 

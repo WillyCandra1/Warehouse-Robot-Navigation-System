@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <sstream>
 #include <cctype>
+#include <iomanip>
 #include "order.h"
 #include "Navigation.hpp"
 #include "ItemManager.hpp"
@@ -13,7 +14,15 @@ void clearScreen() {
     system("cls");
 }
 
-void itemManagementMenu(ItemManager& itemMgr);
+// Prototypes for helper functions
+string readLine(const string& prompt);
+string readWord(const string& prompt);
+int readInt(const string& prompt);
+void waitForEnter();
+bool validItemId(const string& id);
+bool validItemLocation(const string& loc, WarehouseGraph& layout);
+void itemManagementMenu(ItemManager& itemMgr, WarehouseGraph& layout);
+
 void orderMenu(OrderManager& orderManager) {
     int choice;
     do {
@@ -284,7 +293,10 @@ void navigationMenu(navigationSystem& navigation, RobotAssignment& assignment) {
     } while (choice != 0);
 }
 
-void itemManagementMenu(ItemManager& itemMgr) {
+void itemManagementMenu(ItemManager& itemMgr, WarehouseGraph& layout) {
+    string discard;
+    getline(cin, discard);
+
     int choice = 0;
     string id, name, location;
 
@@ -300,21 +312,7 @@ void itemManagementMenu(ItemManager& itemMgr) {
         cout << "5. Update Item Location\n";
         cout << "0. Back to Main Menu\n";
         cout << "====================================\n";
-        cout << "Enter choice: ";
-
-        cin >> choice;
-
-        if (cin.fail()) {
-            if (cin.eof()) {
-                break;
-            }
-            cin.clear();
-            cin.ignore(1000, '\n');
-            cout << "Invalid input. Please enter numbers only.\n";
-            choice = -1;
-        }
-
-        bool needIgnore = true;
+        choice = readInt("Enter choice: ");
 
         if (choice > 0) {
             clearScreen();
@@ -324,50 +322,85 @@ void itemManagementMenu(ItemManager& itemMgr) {
             case 1:
                 itemMgr.displaySortedItems();
                 break;
-            case 2:
-                cout << "Enter Item ID to search: ";
-                cin >> id;
-                {
-                    Item* found = itemMgr.searchItemByID(id);
-                    if (found) {
-                        cout << "Found: " << found->itemName << " at " << found->location << endl;
-                    } else {
-                        cout << "Item not found." << endl;
-                    }
+            case 2: {
+                id = readWord("Enter Item ID to search: ");
+                Item* found = itemMgr.searchItemByID(id);
+                cout << "=======================================================" << endl;
+                cout << "             Search Results for '" << id << "'             " << endl;
+                cout << "=======================================================" << endl;
+                cout << left << setw(10) << "Item ID" 
+                     << " | " << setw(20) << "Item Name" 
+                     << " | " << "Location" << endl;
+                cout << "=======================================================" << endl;
+                if (found) {
+                    cout << left << setw(10) << found->itemID 
+                         << " | " << setw(20) << found->itemName 
+                         << " | " << found->location << endl;
+                } 
+                
+                else {
+                    cout << "            Item not found in database.                " << endl;
                 }
+                cout << "=======================================================" << endl;
                 break;
-            case 3:
-                cout << "Enter Item Name to search: ";
-                cin >> ws;
-                getline(cin, name);
+            }
+            case 3: {
+                name = readLine("Enter Item Name to search: ");
                 itemMgr.searchItemByName(name);
-                needIgnore = false;
                 break;
-            case 4:
-                cout << "Enter New Item ID: "; cin >> id;
-                cout << "Enter Name: "; cin >> ws; getline(cin, name);
-                cout << "Enter Location: "; cin >> location;
+            }
+            case 4: {
+                id = readWord("Enter New Item ID (e.g., ITM016): ");
+                if (!validItemId(id)) {
+                    cout << "Error: Invalid ID format. Must be 'ITM' followed by 3 digits." << endl;
+                    break;
+                }
+                if (itemMgr.searchItemByID(id) != nullptr) {
+                    cout << "Error: Item ID " << id << " already exists in the database." << endl;
+                    break;
+                }
+
+                name = readLine("Enter Name: ");
+                location = readWord("Enter Location (e.g., ZA, A1, SA1): ");
+                for (char& c : location) c = toupper(c);
+
+                if (!validItemLocation(location, layout)) {
+                    cout << "Error: Location " << location << " was out of the layout!" << endl;
+                    break;
+                }
+
                 itemMgr.insertItem(id, name, location);
-                cout << "Item added." << endl;
+                itemMgr.saveItemsToCSV("../data/item.csv");
+                cout << "Item added successfully." << endl;
                 break;
-            case 5:
-                cout << "Enter Item ID to update: "; cin >> id;
-                cout << "Enter New Location: "; cin >> location;
+            }
+            case 5: {
+                id = readWord("Enter Item ID to update: ");
+                if (itemMgr.searchItemByID(id) == nullptr) {
+                    cout << "Error: Item ID " << id << " not found." << endl;
+                    break;
+                }
+                location = readWord("Enter New Location (e.g., ZA, A1, SA1): ");
+                for (char& c : location) c = toupper(c);
+
+                if (!validItemLocation(location, layout)) {
+                    cout << "Error: Location " << location << " was out of the layout!" << endl;
+                    break;
+                }
+
                 itemMgr.updateItemLocation(id, location);
+                itemMgr.saveItemsToCSV("../data/item.csv");
                 break;
+            }
             case 0:
                 cout << "Returning to Main Menu...\n";
                 break;
             default:
-                if (choice != -1) {
-                    cout << "Invalid choice.\n";
-                }
+                cout << "Invalid choice.\n";
         }
 
         if (choice > 0) {
-            cout << "\nPress Enter to continue...";
-            if (needIgnore) cin.ignore(1000, '\n');
-            cin.get();
+            waitForEnter();
         }
     } while (choice != 0);
 }
@@ -382,7 +415,9 @@ string readLine(const string& prompt) {
 string readWord(const string& prompt) {
     cout << prompt;
     string line;
-    if (!getline(cin, line)) return "";
+    if (!getline(cin, line)) {
+        return "";
+    }
     stringstream ss(line);
     string token;
     ss >> token;
@@ -409,11 +444,69 @@ void waitForEnter() {
 }
 
 bool validLocationId(const string& id) {
-    if (id.empty() || id.size() > 10) return false;
-    if (!isalpha((unsigned char)id[0])) return false;
-    for (char c : id) {
-        if (!isalnum((unsigned char)c)) return false;
+    if (id.empty() || id.size() > 10) {
+        return false;
     }
+    if (!isalpha((unsigned char)id[0])) {
+        return false;
+    }
+    for (char c : id) {
+        if (!isalnum((unsigned char)c)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool validItemId(const string& id) {
+    if (id.length() != 6) {
+        return false;
+    }
+    if (id.substr(0, 3) != "ITM") {
+        return false;
+    }
+    for (int i = 3; i < 6; i++) {
+        if (!isdigit(id[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool validItemLocation(const string& loc, WarehouseGraph& layout) {
+    if (loc.empty()) {
+        return false;
+    }
+
+    stringstream ss(loc);
+    string segment;
+    string parts[3];
+    int count = 0;
+    
+    while (getline(ss, segment, '-')) {
+        if (count < 3) {
+            parts[count] = segment;
+        }
+        count++;
+    }
+    
+    if (count != 3) {
+        cout << "Error: Format must be Zone-Aisle-Shelf (e.g., ZB-B1-SB1)!" << endl;
+        return false;
+    }
+
+    for (int i = 0; i < 3; i++) {
+        if (parts[i].empty() || !layout.hasLocation(parts[i])) {
+            cout << "Error: Part '" << parts[i] << "' is not in the layout!" << endl;
+            return false;
+        }
+    }
+    
+    if (parts[2][0] != 'S') {
+        cout << "Error: The destination '" << parts[2] << "' must be a Shelf (starting with 'S')!" << endl;
+        return false;
+    }
+
     return true;
 }
 
@@ -581,9 +674,9 @@ int main() {
 
     clearScreen();
     cout << "Loading Databases...\n";
-    itemMgr.loadItemsFromCSV("../data/items.csv");
-    assignment.loadRobotsFromCSV("../data/robots.csv");
     layout.loadFromCSV("../data/layout.csv");
+    itemMgr.loadItemsFromCSV("../data/item.csv");
+    assignment.loadRobotsFromCSV("../data/robots.csv");
     orderManager.loadFromCSV("../data/orders.csv");
     navigation.loadHistoryFromCSV("../data/navigation_history.csv");
 
@@ -602,7 +695,9 @@ int main() {
         cin >> choice;
 
         if (cin.fail()) {
-            if (cin.eof()) break; 
+            if (cin.eof()) {
+                break;
+            }
             cin.clear();
             cin.ignore(1000, '\n');
             cout << "\nInvalid input. Please enter numbers only.\n";
@@ -617,7 +712,7 @@ int main() {
             case 3: 
                 navigationMenu(navigation, assignment); break;
             case 4: 
-                itemManagementMenu(itemMgr); break; 
+                itemManagementMenu(itemMgr, layout); break; 
             case 5:
                 warehouseLayoutMenu(layout, navigation, assignment); break;
             case 0: 

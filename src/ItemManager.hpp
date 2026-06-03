@@ -6,6 +6,8 @@
 #include <fstream>
 #include <sstream>
 
+class WarehouseGraph; // Forward declaration
+
 struct Item {
     std::string itemID;
     std::string itemName;
