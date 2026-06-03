@@ -97,7 +97,7 @@ void ItemManager::displaySortedItems() {
     cout << left << setw(10) << "Item ID" 
          << " | " << setw(20) << "Item Name" 
          << " | " << "Location" << endl;
-    cout << "-------------------------------------------------------" << endl;
+    cout << "=======================================================" << endl;
     displayInOrder(root);
     cout << "=======================================================" << endl;
 }

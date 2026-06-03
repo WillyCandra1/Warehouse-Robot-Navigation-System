@@ -377,6 +377,7 @@ void itemManagementMenu(ItemManager& itemMgr) {
                     break;
                 }
                 itemMgr.insertItem(id, name, location);
+                itemMgr.saveItemsToCSV("../data/item.csv"); // Auto-save after adding
                 cout << "Item added successfully." << endl;
                 break;
             }
@@ -392,6 +393,7 @@ void itemManagementMenu(ItemManager& itemMgr) {
                     break;
                 }
                 itemMgr.updateItemLocation(id, location);
+                itemMgr.saveItemsToCSV("../data/item.csv"); // Auto-save after updating
                 break;
             }
             case 0:
