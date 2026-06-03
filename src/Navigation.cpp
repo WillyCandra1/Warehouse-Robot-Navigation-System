@@ -1,5 +1,8 @@
 #include "Navigation.hpp"
 #include <iostream>
+#include <fstream>
+#include <sstream>
+#include <ctime>
 using namespace std;
 
 movementStack::movementStack() {
@@ -62,6 +65,23 @@ void movementStack::display() {
     }
 }
 
+std::string movementStack::toString() {
+    if (isEmpty()) return "NONE";
+    Node* nodes[500];
+    int count = 0;
+    Node* current = top;
+    while (current != nullptr) {
+        nodes[count++] = current;
+        current = current->next;
+    }
+    std::string result = "";
+    for (int i = count - 1; i >= 0; i--) {
+        result += nodes[i]->direction;
+        if (i != 0) result += "-";
+    }
+    return result;
+}
+
 void movementStack::clear() {
     while (!isEmpty()) pop();
 }
@@ -70,12 +90,20 @@ navigationSystem::navigationSystem() {
     robotID = "";
     log = "";
     taskCompleted = false;
+    historyCount = 0;
 }
 
 navigationSystem::~navigationSystem() {
     forwardPath.clear();
     backwardPath.clear();
     backwardPathCopy.clear();
+}
+
+std::string navigationSystem::getCurrentTime() {
+    time_t now = time(0);
+    char buf[20];
+    strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", localtime(&now));
+    return std::string(buf);
 }
 
 std::string navigationSystem::getRobotID() {
@@ -117,7 +145,6 @@ void navigationSystem::robotArrived() {
     taskCompleted = true;
     cout << "\n  Robot " << robotID << " arrived at destination!\n";
 
-    // build return path here so its ready for display and execution
     int count = forwardPath.size();
     std::string* steps = new std::string[count];
     for (int i = 0; i < count; i++) {
@@ -154,6 +181,14 @@ void navigationSystem::robotEnd() {
         cout << "  Return step " << step++ << ": " << backwardPath.pop() << "\n";
     }
     cout << "  " << robotID << " safely returned to base!\n";
+
+    if (historyCount < 100) {
+        history[historyCount].robotID     = robotID;
+        history[historyCount].forwardSteps = forwardPath.toString();
+        history[historyCount].returnSteps  = backwardPathCopy.toString();
+        history[historyCount].timestamp    = getCurrentTime();
+        historyCount++;
+    }
 }
 
 void navigationSystem::showStepsSummary() {
@@ -168,4 +203,62 @@ void navigationSystem::showStepsSummary() {
         cout << "\n  Navigation Log\n" << log;
     }
     cout << "  ===============\n";
+}
+
+void navigationSystem::showHistory() {
+    if (historyCount == 0) {
+        cout << "\n  No navigation history yet.\n";
+        return;
+    }
+    cout << "\n  ===== Navigation History =====\n";
+    for (int i = 0; i < historyCount; i++) {
+        cout << "\n  Journey " << (i + 1) << "\n";
+        cout << "  Robot     : " << history[i].robotID << "\n";
+        cout << "  Forward   : " << history[i].forwardSteps << "\n";
+        cout << "  Return    : " << history[i].returnSteps << "\n";
+        cout << "  Time      : " << history[i].timestamp << "\n";
+    }
+    cout << "\n  ==============================\n";
+}
+
+void navigationSystem::loadHistoryFromCSV(std::string filename) {
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        cout << "  No navigation history found. Starting fresh.\n";
+        return;
+    }
+
+    std::string line;
+    getline(file, line); 
+
+    while (getline(file, line) && historyCount < 100) {
+        if (line.empty()) continue;
+        std::stringstream ss(line);
+        HistoryEntry entry;
+        getline(ss, entry.robotID,      ',');
+        getline(ss, entry.forwardSteps, ',');
+        getline(ss, entry.returnSteps,  ',');
+        getline(ss, entry.timestamp,    ',');
+        history[historyCount++] = entry;
+    }
+    file.close();
+    cout << "  Navigation history loaded.\n";
+}
+
+void navigationSystem::saveHistoryToCSV(std::string filename) {
+    std::ofstream file(filename);
+    if (!file.is_open()) {
+        cout << "  Could not save navigation history.\n";
+        return;
+    }
+
+    file << "robotID,forwardSteps,returnSteps,timestamp\n";
+    for (int i = 0; i < historyCount; i++) {
+        file << history[i].robotID      << ","
+             << history[i].forwardSteps << ","
+             << history[i].returnSteps  << ","
+             << history[i].timestamp    << "\n";
+    }
+    file.close();
+    cout << "  Navigation history saved.\n";
 }

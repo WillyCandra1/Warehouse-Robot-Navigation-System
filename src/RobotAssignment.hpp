@@ -24,5 +24,6 @@ public:
     void saveRobotsToCSV(string filename);
     bool isEmpty();
     bool robotExists(string robotID);
+    void getAvailableRobots(string result[], int& count, int maxSize);
     ~RobotAssignment();
 };    

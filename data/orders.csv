@@ -1,0 +1,6 @@
+id,customerName,itemName,quantity,status
+1,Alice Johnson,Hammer,2,Completed
+2,Bob Smith,Screwdriver,1,Completed
+3,Charlie Brown,Wrench,3,Completed
+4,Diana Prince,Drill,1,Pending
+5,Evan Ford,Nails,10,Pending
