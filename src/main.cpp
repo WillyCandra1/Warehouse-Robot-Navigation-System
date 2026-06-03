@@ -19,7 +19,7 @@ void orderMenu(OrderManager& orderManager) {
     do {
         clearScreen();
         cout << "\n====================================\n";
-        cout << " Order Management Module\n";
+        cout << "       Order Management Module\n";
         cout << "====================================\n";
         cout << "1. Add new order\n";
         cout << "2. Process next order\n";
@@ -65,9 +65,9 @@ void robotAssignmentMenu(RobotAssignment& assignment) {
     int choice;
     do {
         clearScreen();
-        cout << "==========================" << endl;
-        cout << " Robot Assignment Module" << endl;
-        cout << "==========================" << endl;
+        cout << "===========================" << endl;
+        cout << "  Robot Assignment Module" << endl;
+        cout << "===========================" << endl;
         cout << "1. Add new robot" << endl;
         cout << "2. Assign next task" << endl;
         cout << "3. Display robot status" << endl;
@@ -179,7 +179,7 @@ void navigationMenu(navigationSystem& navigation) {
     do {
         clearScreen();
         cout << "\n====================================\n";
-        cout << " Robot Navigation Module\n";
+        cout << "       Robot Navigation Module\n";
         cout << "====================================\n";
         cout << "1. Start robot\n";
         cout << "2. Move robot\n";
@@ -269,7 +269,7 @@ void itemManagementMenu(ItemManager& itemMgr) {
         clearScreen();
         cout << "\n====================================\n";
         cout << "        Item Management Menu         \n";
-        cout << "\n====================================\n";
+        cout << "====================================\n";
         cout << "1. Display All Items (Sorted by ID)\n";
         cout << "2. Search Item by ID\n";
         cout << "3. Search Item by Name\n";
