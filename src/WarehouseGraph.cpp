@@ -7,6 +7,7 @@
 #include <cctype>
 using namespace std;
 
+// checks a string is a whole number, prevent crashing
 static bool isInteger(const string& s) {
     if (s.empty()) return false;
     int start = 0;
@@ -19,7 +20,7 @@ static bool isInteger(const string& s) {
 }
 
 WarehouseGraph::WarehouseGraph() {
-    capacity = 8;
+    capacity = 8;   // start with room for 8 locations and grow later if needed
     count = 0;
     locations = new Vertex[capacity];
     lastPath = nullptr;
@@ -30,6 +31,7 @@ WarehouseGraph::WarehouseGraph() {
 }
 
 WarehouseGraph::~WarehouseGraph() {
+    // free every edge in each location's list, then the locations array itself
     for (int i = 0; i < count; i++) {
         EdgeNode* e = locations[i].edges;
         while (e != nullptr) {
@@ -63,7 +65,7 @@ int WarehouseGraph::findIndex(string id) {
     return -1;
 }
 
-void WarehouseGraph::expand() {
+void WarehouseGraph::expand() { // double the capacity and copy everything across when the array is full
     int newCap = capacity * 2;
     Vertex* bigger = new Vertex[newCap];
     for (int i = 0; i < count; i++) {
@@ -87,8 +89,8 @@ bool WarehouseGraph::hasDock() {
 }
 
 bool WarehouseGraph::addLocation(string id, string name, string type, int x, int y) {
-    if (findIndex(id) != -1) return false;
-    if (type == "DOCK" && findDock() != -1) return false;
+    if (findIndex(id) != -1) return false;  // no duplicate IDs
+    if (type == "DOCK" && findDock() != -1) return false; // only one dock allowed
     if (count == capacity) expand();
     locations[count].id = id;
     locations[count].name = name;
@@ -101,6 +103,7 @@ bool WarehouseGraph::addLocation(string id, string name, string type, int x, int
 }
 
 void WarehouseGraph::linkEdge(int from, int to, int weight) {
+    // add a new edge node to the front of the list for this location
     EdgeNode* node = new EdgeNode;
     node->target = to;
     node->weight = weight;
@@ -109,6 +112,7 @@ void WarehouseGraph::linkEdge(int from, int to, int weight) {
 }
 
 bool WarehouseGraph::connect(string fromId, string toId, int weight) {
+    // find the indices of the two locations and check they exist and are not already connected
     int a = findIndex(fromId);
     int b = findIndex(toId);
     if (a == -1 || b == -1) {
@@ -126,7 +130,7 @@ bool WarehouseGraph::connect(string fromId, string toId, int weight) {
         }
     }
     linkEdge(a, b, weight);
-    linkEdge(b, a, weight);
+    linkEdge(b, a, weight); // store both directions so the path is two-way
     return true;
 }
 
@@ -169,7 +173,7 @@ void WarehouseGraph::displayLayout() {
             for (EdgeNode* e = locations[i].edges; e != nullptr; e = e->next) {
                 neighbours[k++] = e->target;
             }
-            for (int a = 0; a < degree - 1; a++) {
+            for (int a = 0; a < degree - 1; a++) { //// sort neighbours by ID so the list reads tidily instead of in insertion order
                 int pick = a;
                 for (int b = a + 1; b < degree; b++) {
                     if (locations[neighbours[b]].id < locations[neighbours[pick]].id) pick = b;
@@ -200,7 +204,7 @@ void WarehouseGraph::displayLayout() {
     cout << "===========================================================\n";
 }
 
-void WarehouseGraph::traverseAll(string startId) {
+void WarehouseGraph::traverseAll(string startId) { // breadth-first search: visit the start, then everything one step away, then two, and so on
     int start = findIndex(startId);
     if (start == -1) {
         cout << "Location " << startId << " not found." << endl;
@@ -242,7 +246,7 @@ void WarehouseGraph::traverseAll(string startId) {
     delete[] queue;
 }
 
-void WarehouseGraph::buildMoves(int* path, int len) {
+void WarehouseGraph::buildMoves(int* path, int len) {   // turn the route into robot directions by comparing each step's coordinates
     if (lastMoves != nullptr) {
         delete[] lastMoves;
         lastMoves = nullptr;
@@ -257,7 +261,7 @@ void WarehouseGraph::buildMoves(int* path, int len) {
         int b = path[i + 1];
         int dx = locations[b].x - locations[a].x;
         int dy = locations[b].y - locations[a].y;
-        if (dy < 0) steps[m++] = "FORWARD";
+        if (dy < 0) steps[m++] = "FORWARD";       
         else if (dy > 0) steps[m++] = "BACKWARD";
         if (dx > 0) steps[m++] = "RIGHT";
         else if (dx < 0) steps[m++] = "LEFT";
@@ -273,11 +277,11 @@ int WarehouseGraph::findDock() {
     return -1;
 }
 
-bool WarehouseGraph::computePath(int src, int dest) {
-    const int INF = 1000000;
-    int* dist = new int[count];
-    int* prev = new int[count];
-    bool* done = new bool[count];
+bool WarehouseGraph::computePath(int src, int dest) {   // Dijkstra's shortest path
+    const int INF = 1000000;    
+    int* dist = new int[count];         // best known distance from src to each location
+    int* prev = new int[count];         //which location we came from
+    bool* done = new bool[count];       // whether a location's distance is finalised
     for (int i = 0; i < count; i++) {
         dist[i] = INF;
         prev[i] = -1;
@@ -285,10 +289,10 @@ bool WarehouseGraph::computePath(int src, int dest) {
     }
     dist[src] = 0;
 
-    for (int s = 0; s < count; s++) {
+    for (int s = 0; s < count; s++) {   // pick the nearest location we haven't finalised yet
         int u = -1;
         int smallest = INF;
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < count; i++) { 
             if (!done[i] && dist[i] < smallest) {
                 smallest = dist[i];
                 u = i;
@@ -296,7 +300,7 @@ bool WarehouseGraph::computePath(int src, int dest) {
         }
         if (u == -1) break;
         done[u] = true;
-        for (EdgeNode* e = locations[u].edges; e != nullptr; e = e->next) {
+        for (EdgeNode* e = locations[u].edges; e != nullptr; e = e->next) { // update distances to each neighbour of that location
             int v = e->target;
             if (!done[v] && dist[u] + e->weight < dist[v]) {
                 dist[v] = dist[u] + e->weight;
@@ -305,13 +309,13 @@ bool WarehouseGraph::computePath(int src, int dest) {
         }
     }
 
-    if (dist[dest] == INF) {
+    if (dist[dest] == INF) { // destination was never reached
         delete[] dist;
         delete[] prev;
         delete[] done;
         return false;
     }
-
+    // walk prev[] backwards from dest to rebuild the route in forward order
     int len = 0;
     for (int at = dest; at != -1; at = prev[at]) len++;
 
@@ -368,7 +372,7 @@ void WarehouseGraph::planRoute(string fromId, string toId) {
     }
     cout << "\n";
 }
-
+// a robot always leaves from the dock (its base), so the return trip lands back there
 void WarehouseGraph::dispatchToRobot(navigationSystem& nav, string robotID, string destId) {
     int base = findDock();
     if (base == -1) {
@@ -393,7 +397,7 @@ void WarehouseGraph::dispatchToRobot(navigationSystem& nav, string robotID, stri
 
     cout << "\nDispatching " << robotID << " from " << locations[base].name
          << " to " << locations[dest].name << " (distance " << lastDistance << ").\n";
-
+// hand the route to the Task 3 navigation module to execute step by step
     nav.robotStart(robotID);
     for (int i = 0; i < lastMoveCount; i++) {
         nav.robotMove(lastMoves[i]);

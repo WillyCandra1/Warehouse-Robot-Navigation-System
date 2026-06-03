@@ -7,7 +7,7 @@ class navigationSystem;
 
 using namespace std;
 
-struct EdgeNode {
+struct EdgeNode {   // one connection leaving a location
     int target;
     int weight;
     EdgeNode* next;
@@ -16,10 +16,10 @@ struct EdgeNode {
 struct Vertex {
     string id;
     string name;
-    string type;
+    string type;    // DOCK, ZONE, AISLE or SHELF
     int x;
-    int y;
-    EdgeNode* edges;
+    int y;          // position on the floor grid
+    EdgeNode* edges;// head of this location's list of connections
 };
 
 class WarehouseGraph {
