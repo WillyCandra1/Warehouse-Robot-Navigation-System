@@ -1,17 +1,21 @@
 #include "ItemManager.hpp"
+#include <iomanip>
 
 using namespace std;
 
+// constructor
 ItemManager::ItemManager() {
     root = nullptr;
 }
 
+// Destructor
 ItemManager::~ItemManager() {
     while (root != nullptr) {
         root = deleteRecursive(root, root->data.itemID);
     }
 }
 
+// insert a new item into the BST
 ItemNode* ItemManager::insertRecursive(ItemNode* node, Item newItem) {
     if (node == nullptr) {
         return new ItemNode(newItem);
@@ -28,6 +32,7 @@ ItemNode* ItemManager::insertRecursive(ItemNode* node, Item newItem) {
     return node;
 }
 
+// searching for an item by ID
 ItemNode* ItemManager::searchRecursive(ItemNode* node, string id) {
     if (node == nullptr || node->data.itemID == id) {
         return node;
@@ -40,16 +45,18 @@ ItemNode* ItemManager::searchRecursive(ItemNode* node, string id) {
     return searchRecursive(node->left, id);
 }
 
+// search for items by name (not ID)
 void ItemManager::displayInOrder(ItemNode* node) {
     if (node != nullptr) {
         displayInOrder(node->left);
-        cout << "ID: " << node->data.itemID 
-             << " | Name: " << node->data.itemName 
-             << " | Location: " << node->data.location << endl;
+        cout << left << setw(10) << node->data.itemID 
+             << " | " << setw(20) << node->data.itemName 
+             << " | " << node->data.location << endl;
         displayInOrder(node->right);
     }
 }
 
+// save items to CSV in sorted order
 void ItemManager::saveInOrder(ItemNode* node, ofstream& outFile) {
     if (node != nullptr) {
         saveInOrder(node->left, outFile);
@@ -60,6 +67,7 @@ void ItemManager::saveInOrder(ItemNode* node, ofstream& outFile) {
     }
 }
 
+// inserting a new item
 void ItemManager::insertItem(string id, string name, string location) {
     Item newItem;
     newItem.itemID = id;
@@ -68,6 +76,7 @@ void ItemManager::insertItem(string id, string name, string location) {
     root = insertRecursive(root, newItem);
 }
 
+// searching for an item by ID and returning a pointer to it
 Item* ItemManager::searchItemByID(string id) {
     ItemNode* result = searchRecursive(root, id);
     if (result != nullptr) {
@@ -76,16 +85,24 @@ Item* ItemManager::searchItemByID(string id) {
     return nullptr;
 }
 
+// display all items in sorted order by ID
 void ItemManager::displaySortedItems() {
     if (root == nullptr) {
         cout << "The item database is currently empty." << endl;
         return;
     }
-    cout << "   Warehouse Item List (Sorted by ID)    " << endl;
+    cout << "=======================================================" << endl;
+    cout << "           Warehouse Item List (Sorted by ID)          " << endl;
+    cout << "=======================================================" << endl;
+    cout << left << setw(10) << "Item ID" 
+         << " | " << setw(20) << "Item Name" 
+         << " | " << "Location" << endl;
+    cout << "-------------------------------------------------------" << endl;
     displayInOrder(root);
-    cout << "==========================================" << endl;
+    cout << "=======================================================" << endl;
 }
 
+// load items from CSV file into the BST
 void ItemManager::loadItemsFromCSV(string filename) {
     ifstream inFile(filename);
     if (!inFile.is_open()) {
@@ -104,6 +121,7 @@ void ItemManager::loadItemsFromCSV(string filename) {
     cout << "Successfully loaded items from " << filename << " into the tree." << endl;
 }
 
+// save items from the BST back to a CSV file
 void ItemManager::saveItemsToCSV(string filename) {
     ofstream outFile(filename);
     if (!outFile.is_open()) {
@@ -117,6 +135,7 @@ void ItemManager::saveItemsToCSV(string filename) {
     cout << "Successfully saved all items to " << filename << "." << endl;
 }
 
+// update the location of an existing item
 bool ItemManager::updateItemLocation(string id, string newLocation) {
     Item* itemToUpdate = searchItemByID(id);
     
@@ -130,6 +149,7 @@ bool ItemManager::updateItemLocation(string id, string newLocation) {
     }
 }
 
+// find the node with the minimum item ID in a subtree (used for deletion)
 ItemNode* ItemManager::findMin(ItemNode* node) {
     while (node && node->left != nullptr) {
         node = node->left;
@@ -137,6 +157,7 @@ ItemNode* ItemManager::findMin(ItemNode* node) {
     return node;
 }
 
+// delete an item in the tree
 ItemNode* ItemManager::deleteRecursive(ItemNode* node, string id) {
     if (node == nullptr) return node;
 
@@ -165,6 +186,7 @@ ItemNode* ItemManager::deleteRecursive(ItemNode* node, string id) {
     return node;
 }
 
+// delete an item by ID
 void ItemManager::deleteItem(string id) {
     if (searchItemByID(id) == nullptr) {
         cout << "Cannot delete. Item ID " << id << " does not exist." << endl;
@@ -175,6 +197,7 @@ void ItemManager::deleteItem(string id) {
     cout << "Item " << id << " successfully deleted." << endl;
 }
 
+// search for items by name in tree
 void ItemManager::searchByNameRecursive(ItemNode* node, string name, bool& found) {
     if (node == nullptr) return;
 
@@ -190,8 +213,9 @@ void ItemManager::searchByNameRecursive(ItemNode* node, string name, bool& found
     searchByNameRecursive(node->right, name, found);
 }
 
+// search for items by name and display results
 void ItemManager::searchItemByName(string name) {
-    cout << "=== Search Results for '" << name << "' ===" << endl;
+    cout << "Search Results for '" << name << "':" << endl;
     bool found = false;
     searchByNameRecursive(root, name, found);
     
