@@ -401,9 +401,9 @@ void warehouseLayoutMenu(WarehouseGraph& layout, navigationSystem& navigation, R
     int choice;
     do {
         clearScreen();
-        cout << "\n====================================\n";
-        cout << " Warehouse Layout Module\n";
-        cout << "====================================\n";
+        cout << "\n=====================================\n";
+        cout << "       Warehouse Layout Module\n";
+        cout << "=====================================\n";
         cout << "1. Display warehouse layout\n";
         cout << "2. Add location\n";
         cout << "3. Connect two locations\n";
@@ -564,7 +564,7 @@ int main() {
     do {
         clearScreen();
         cout << "\n====================================\n";
-        cout << " Warehouse Robot System\n";
+        cout << "       Warehouse Robot System\n";
         cout << "====================================\n";
         cout << "1. Order Management (Task 1)\n";
         cout << "2. Robot Assignment (Task 2)\n";
