@@ -4,7 +4,19 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
+#include <cctype>
 using namespace std;
+
+static bool isInteger(const string& s) {
+    if (s.empty()) return false;
+    int start = 0;
+    if (s[0] == '-' || s[0] == '+') start = 1;
+    if (start == (int)s.size()) return false;
+    for (int i = start; i < (int)s.size(); i++) {
+        if (!isdigit((unsigned char)s[i])) return false;
+    }
+    return true;
+}
 
 WarehouseGraph::WarehouseGraph() {
     capacity = 8;
@@ -415,12 +427,16 @@ void WarehouseGraph::loadFromCSV(string filename) {
             string id, name, type, xs, ys;
             if (getline(ss, id, ',') && getline(ss, name, ',') &&
                 getline(ss, type, ',') && getline(ss, xs, ',') && getline(ss, ys, ',')) {
-                addLocation(id, name, type, stoi(xs), stoi(ys));
+                if (isInteger(xs) && isInteger(ys)) {
+                    addLocation(id, name, type, stoi(xs), stoi(ys));
+                }
             }
         } else if (mode == 2) {
             string a, b, w;
             if (getline(ss, a, ',') && getline(ss, b, ',') && getline(ss, w, ',')) {
-                connect(a, b, stoi(w));
+                if (isInteger(w) && stoi(w) > 0) {
+                    connect(a, b, stoi(w));
+                }
             }
         }
     }

@@ -423,7 +423,7 @@ void warehouseLayoutMenu(WarehouseGraph& layout, navigationSystem& navigation, R
                 break;
 
             case 2: {
-                string id = readWord("Enter location ID (e.g. A1, SB1, ZA): ");
+                string id = readWord("Enter location ID (e.g. A1, SB1, DOCK1, ZA): ");
                 for (char& c : id) c = toupper(c);
                 if (!validLocationId(id)) {
                     cout << "Invalid ID. Use letters and digits only, starting with a letter (e.g. A1).\n";
@@ -437,6 +437,10 @@ void warehouseLayoutMenu(WarehouseGraph& layout, navigationSystem& navigation, R
                 string name = readLine("Enter a name for it (e.g. Shelf A-3): ");
                 if (name.empty()) {
                     cout << "The name cannot be empty.\n";
+                    break;
+                }
+                if (name.find(',') != string::npos) {
+                    cout << "The name cannot contain a comma.\n";
                     break;
                 }
 
