@@ -394,7 +394,7 @@ bool validLocationId(const string& id) {
     return true;
 }
 
-void warehouseLayoutMenu(WarehouseGraph& layout, navigationSystem& navigation) {
+void warehouseLayoutMenu(WarehouseGraph& layout, navigationSystem& navigation, RobotAssignment& assignment) {
     string discard;
     getline(cin, discard);
 
@@ -507,6 +507,15 @@ void warehouseLayoutMenu(WarehouseGraph& layout, navigationSystem& navigation) {
 
             case 6: {
                 string robotID = readWord("Enter robot ID to carry out the route: ");
+                if (robotID.empty()) {
+                    cout << "Robot ID cannot be empty.\n";
+                    break;
+                }
+                if (!assignment.robotExists(robotID)) {
+                    cout << "Robot " << robotID << " does not exist. Add it first in the "
+                         << "Robot Assignment module (Task 2).\n";
+                    break;
+                }
                 layout.dispatchToRobot(navigation, robotID);
                 break;
             }
@@ -570,7 +579,7 @@ int main() {
             case 4: 
                 itemManagementMenu(itemMgr); break; 
             case 5:
-                warehouseLayoutMenu(layout, navigation); break;
+                warehouseLayoutMenu(layout, navigation, assignment); break;
             case 0: 
                 cout << "\nSaving data and exiting system...\n"; 
                 itemMgr.saveItemsToCSV("../data/items.csv");
