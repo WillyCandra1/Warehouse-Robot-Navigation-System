@@ -202,25 +202,31 @@ void ItemManager::searchByNameRecursive(ItemNode* node, string name, bool& found
     if (node == nullptr) return;
 
     searchByNameRecursive(node->left, name, found);
-    
+
     if (node->data.itemName == name) {
-        cout << "Found: ID: " << node->data.itemID 
-             << " | Name: " << node->data.itemName 
-             << " | Location: " << node->data.location << endl;
+        cout << left << setw(10) << node->data.itemID 
+             << " | " << setw(20) << node->data.itemName 
+             << " | " << node->data.location << endl;
         found = true;
     }
-    
+
     searchByNameRecursive(node->right, name, found);
 }
 
-// search for items by name and display results
 void ItemManager::searchItemByName(string name) {
-    cout << "Search Results for '" << name << "':" << endl;
+    cout << "=======================================================" << endl;
+    cout << "             Search Results for '" << name << "'             " << endl;
+    cout << "=======================================================" << endl;
+    cout << left << setw(10) << "Item ID" 
+         << " | " << setw(20) << "Item Name" 
+         << " | " << "Location" << endl;
+    cout << "=======================================================" << endl;
+
     bool found = false;
     searchByNameRecursive(root, name, found);
-    
+
     if (!found) {
-        cout << "No items found matching that name." << endl;
+        cout << "          No items found matching that name.           " << endl;
     }
-    cout << "=======================================" << endl;
+    cout << "=======================================================" << endl;
 }

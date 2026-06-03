@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <sstream>
 #include <cctype>
+#include <iomanip>
 #include "order.h"
 #include "Navigation.hpp"
 #include "ItemManager.hpp"
@@ -318,6 +319,9 @@ void waitForEnter() {
 
 
 void itemManagementMenu(ItemManager& itemMgr) {
+    string discard;
+    getline(cin, discard);
+
     int choice = 0;
     string id, name, location;
 
@@ -346,11 +350,21 @@ void itemManagementMenu(ItemManager& itemMgr) {
             case 2: {
                 id = readWord("Enter Item ID to search: ");
                 Item* found = itemMgr.searchItemByID(id);
+                cout << "=======================================================" << endl;
+                cout << "             Search Results for '" << id << "'             " << endl;
+                cout << "=======================================================" << endl;
+                cout << left << setw(10) << "Item ID" 
+                     << " | " << setw(20) << "Item Name" 
+                     << " | " << "Location" << endl;
+                cout << "=======================================================" << endl;
                 if (found) {
-                    cout << "Found: " << found->itemName << " at " << found->location << endl;
+                    cout << left << setw(10) << found->itemID 
+                         << " | " << setw(20) << found->itemName 
+                         << " | " << found->location << endl;
                 } else {
-                    cout << "Item not found." << endl;
+                    cout << "            Item not found in database.                " << endl;
                 }
+                cout << "=======================================================" << endl;
                 break;
             }
             case 3: {
