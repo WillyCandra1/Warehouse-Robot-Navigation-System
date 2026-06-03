@@ -37,6 +37,9 @@ public:
     void showPendingOrders();
     void showCompletedOrders();
     void showSummary();
+
+    void loadFromCSV(string filename);
+    void saveToCSV(string filename);
 };
 
 #endif

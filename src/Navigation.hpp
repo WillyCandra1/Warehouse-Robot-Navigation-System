@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include <fstream>
 
 struct Node {
     std::string direction;
@@ -20,6 +21,7 @@ public:
     int size();
     void display();
     void clear();
+    std::string toString(); 
 private:
     Node* top;
 };
@@ -35,13 +37,28 @@ public:
     void robotEnd();
     void showStepsSummary();
     std::string getRobotID();
+    void loadHistoryFromCSV(std::string filename);
+    void saveHistoryToCSV(std::string filename);
+    void showHistory();
 private:
     std::string robotID;
     std::string log;
     bool taskCompleted;
     movementStack forwardPath;
-    movementStack backwardPath;      // used for executing return
-    movementStack backwardPathCopy;  // kept for display in summary
+    movementStack backwardPath;
+    movementStack backwardPathCopy;
+
+    struct HistoryEntry {
+        std::string robotID;
+        std::string forwardSteps;
+        std::string returnSteps;
+        std::string timestamp;
+    };
+
+    HistoryEntry history[100];
+    int historyCount;
+
+    std::string getCurrentTime();
 };
 
 #endif

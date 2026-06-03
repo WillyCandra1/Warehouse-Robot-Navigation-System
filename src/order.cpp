@@ -142,3 +142,73 @@ void OrderManager::showSummary() {
     cout << "Completed orders: " << completedCount << endl;
     cout << "Maximum pending orders: " << MAX_ORDERS << endl;
 }
+#include <fstream>
+#include <sstream>
+
+void OrderManager::loadFromCSV(string filename) {
+    ifstream file(filename);
+    if (!file.is_open()) {
+        cout << "No existing order data found. Starting fresh.\n";
+        return;
+    }
+
+    string line;
+    getline(file, line); 
+
+    while (getline(file, line)) {
+        if (line.empty()) continue;
+
+        stringstream ss(line);
+        string token;
+        Order o;
+
+        getline(ss, token, ','); o.id = stoi(token);
+        getline(ss, o.customerName, ',');
+        getline(ss, o.itemName, ',');
+        getline(ss, token, ','); o.quantity = stoi(token);
+        getline(ss, o.status, ',');
+
+        if (o.status == "Pending" && !isFull()) {
+            rear = (rear + 1) % MAX_ORDERS;
+            pending[rear] = o;
+            pendingCount++;
+            if (o.id >= nextId) nextId = o.id + 1;
+        } else if (o.status == "Completed" && completedCount < MAX_ORDERS) {
+            completed[completedCount++] = o;
+            if (o.id >= nextId) nextId = o.id + 1;
+        }
+    }
+    file.close();
+    cout << "Orders loaded from " << filename << "\n";
+}
+
+void OrderManager::saveToCSV(string filename) {
+    ofstream file(filename);
+    if (!file.is_open()) {
+        cout << "Could not save orders to " << filename << "\n";
+        return;
+    }
+
+    file << "id,customerName,itemName,quantity,status\n";
+
+    int index = front;
+    for (int i = 0; i < pendingCount; i++) {
+        file << pending[index].id << ","
+             << pending[index].customerName << ","
+             << pending[index].itemName << ","
+             << pending[index].quantity << ","
+             << pending[index].status << "\n";
+        index = (index + 1) % MAX_ORDERS;
+    }
+
+    for (int i = 0; i < completedCount; i++) {
+        file << completed[i].id << ","
+             << completed[i].customerName << ","
+             << completed[i].itemName << ","
+             << completed[i].quantity << ","
+             << completed[i].status << "\n";
+    }
+
+    file.close();
+    cout << "Orders saved to " << filename << "\n";
+}

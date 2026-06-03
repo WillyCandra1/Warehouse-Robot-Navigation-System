@@ -170,3 +170,15 @@ RobotAssignment::~RobotAssignment() {
         delete temp;
     }
 };
+
+void RobotAssignment::getAvailableRobots(string result[], int& count, int maxSize) {
+    count = 0;
+    if (rear == nullptr) return;
+    RobotNode* current = rear->next;
+    do {
+        if (current->data.status == "Available" && count < maxSize) {
+            result[count++] = current->data.robotID;
+        }
+        current = current->next;
+    } while (current != rear->next);
+}
