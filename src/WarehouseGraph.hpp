@@ -39,19 +39,22 @@ private:
     void linkEdge(int from, int to, int weight);
     void buildMoves(int* path, int len);
     void clearRoute();
+    bool computePath(int src, int dest);
+    int findDock();
 
 public:
     WarehouseGraph();
     ~WarehouseGraph();
 
     bool hasLocation(string id);
+    bool hasDock();
     bool addLocation(string id, string name, string type, int x, int y);
     bool connect(string fromId, string toId, int weight);
 
     void displayLayout();
     void traverseAll(string startId);
     void planRoute(string fromId, string toId);
-    void dispatchToRobot(navigationSystem& nav, string robotID);
+    void dispatchToRobot(navigationSystem& nav, string robotID, string destId);
 
     void loadFromCSV(string filename);
     void saveToCSV(string filename);

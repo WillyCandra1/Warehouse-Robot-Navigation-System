@@ -70,8 +70,13 @@ bool WarehouseGraph::hasLocation(string id) {
     return findIndex(id) != -1;
 }
 
+bool WarehouseGraph::hasDock() {
+    return findDock() != -1;
+}
+
 bool WarehouseGraph::addLocation(string id, string name, string type, int x, int y) {
     if (findIndex(id) != -1) return false;
+    if (type == "DOCK" && findDock() != -1) return false;
     if (count == capacity) expand();
     locations[count].id = id;
     locations[count].name = name;
@@ -249,18 +254,14 @@ void WarehouseGraph::buildMoves(int* path, int len) {
     lastMoveCount = m;
 }
 
-void WarehouseGraph::planRoute(string fromId, string toId) {
-    int src = findIndex(fromId);
-    int dest = findIndex(toId);
-    if (src == -1 || dest == -1) {
-        cout << "Route failed. Make sure both locations exist." << endl;
-        return;
+int WarehouseGraph::findDock() {
+    for (int i = 0; i < count; i++) {
+        if (locations[i].type == "DOCK") return i;
     }
-    if (src == dest) {
-        cout << "Start and destination are the same place." << endl;
-        return;
-    }
+    return -1;
+}
 
+bool WarehouseGraph::computePath(int src, int dest) {
     const int INF = 1000000;
     int* dist = new int[count];
     int* prev = new int[count];
@@ -293,12 +294,10 @@ void WarehouseGraph::planRoute(string fromId, string toId) {
     }
 
     if (dist[dest] == INF) {
-        cout << "There is no route between " << locations[src].name
-             << " and " << locations[dest].name << "." << endl;
         delete[] dist;
         delete[] prev;
         delete[] done;
-        return;
+        return false;
     }
 
     int len = 0;
@@ -312,6 +311,31 @@ void WarehouseGraph::planRoute(string fromId, string toId) {
         lastPath[k--] = at;
     }
     lastDistance = dist[dest];
+    buildMoves(lastPath, lastPathLen);
+
+    delete[] dist;
+    delete[] prev;
+    delete[] done;
+    return true;
+}
+
+void WarehouseGraph::planRoute(string fromId, string toId) {
+    int src = findIndex(fromId);
+    int dest = findIndex(toId);
+    if (src == -1 || dest == -1) {
+        cout << "Route failed. Make sure both locations exist." << endl;
+        return;
+    }
+    if (src == dest) {
+        cout << "Start and destination are the same place." << endl;
+        return;
+    }
+
+    if (!computePath(src, dest)) {
+        cout << "There is no route between " << locations[src].name
+             << " and " << locations[dest].name << "." << endl;
+        return;
+    }
 
     cout << "\nShortest route from " << locations[src].name << " to "
          << locations[dest].name << ":\n  ";
@@ -320,8 +344,6 @@ void WarehouseGraph::planRoute(string fromId, string toId) {
         if (i < lastPathLen - 1) cout << " -> ";
     }
     cout << "\n  Total distance: " << lastDistance << "\n";
-
-    buildMoves(lastPath, lastPathLen);
 
     cout << "  Robot steps: ";
     if (lastMoveCount == 0) {
@@ -333,24 +355,42 @@ void WarehouseGraph::planRoute(string fromId, string toId) {
         }
     }
     cout << "\n";
-
-    delete[] dist;
-    delete[] prev;
-    delete[] done;
 }
 
-void WarehouseGraph::dispatchToRobot(navigationSystem& nav, string robotID) {
-    if (lastPath == nullptr || lastPathLen < 2) {
-        cout << "No route is ready yet. Find a route first." << endl;
+void WarehouseGraph::dispatchToRobot(navigationSystem& nav, string robotID, string destId) {
+    int base = findDock();
+    if (base == -1) {
+        cout << "No base is set. Add a location of type Dock to act as the robot base." << endl;
         return;
     }
+    int dest = findIndex(destId);
+    if (dest == -1) {
+        cout << "Destination " << destId << " does not exist." << endl;
+        return;
+    }
+    if (dest == base) {
+        cout << "The destination is the base itself, so there is nothing to travel." << endl;
+        return;
+    }
+
+    if (!computePath(base, dest)) {
+        cout << "There is no route from " << locations[base].name
+             << " to " << locations[dest].name << "." << endl;
+        return;
+    }
+
+    cout << "\nDispatching " << robotID << " from " << locations[base].name
+         << " to " << locations[dest].name << " (distance " << lastDistance << ").\n";
+
     nav.robotStart(robotID);
     for (int i = 0; i < lastMoveCount; i++) {
         nav.robotMove(lastMoves[i]);
     }
     nav.robotArrived();
-    cout << "\nRoute handed over to the navigation module. Go to the Robot "
-            "Navigation menu and pick 'Return to base' to bring it back.\n";
+
+    cout << "\n" << robotID << " is now at " << locations[dest].name
+         << ". Open the Robot Navigation menu and choose 'Return to base' to send it back to "
+         << locations[base].name << ".\n";
 }
 
 void WarehouseGraph::loadFromCSV(string filename) {

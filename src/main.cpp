@@ -409,7 +409,7 @@ void warehouseLayoutMenu(WarehouseGraph& layout, navigationSystem& navigation, R
         cout << "3. Connect two locations\n";
         cout << "4. Find route between two locations\n";
         cout << "5. Traverse all sections\n";
-        cout << "6. Send route to robot\n";
+        cout << "6. Dispatch a robot to a location\n";
         cout << "0. Back to main menu\n";
         choice = readInt("Enter choice: ");
 
@@ -423,7 +423,7 @@ void warehouseLayoutMenu(WarehouseGraph& layout, navigationSystem& navigation, R
                 break;
 
             case 2: {
-                string id = readWord("Enter location ID (e.g. A1, SB1, DOCK1, ZA): ");
+                string id = readWord("Enter location ID (e.g. A1, SB1, ZA): ");
                 for (char& c : id) c = toupper(c);
                 if (!validLocationId(id)) {
                     cout << "Invalid ID. Use letters and digits only, starting with a letter (e.g. A1).\n";
@@ -459,6 +459,11 @@ void warehouseLayoutMenu(WarehouseGraph& layout, navigationSystem& navigation, R
                 else if (typeChoice == 3) type = "SHELF";
                 else type = "DOCK";
 
+                if (type == "DOCK" && layout.hasDock()) {
+                    cout << "A base dock already exists. Only one dock (the robot base) is allowed.\n";
+                    break;
+                }
+
                 cout << "\nGrid position is where the location sits on the warehouse floor map.\n";
                 cout << "  X = column, Y = row\n";
                 int x = readInt("Enter grid X: ");
@@ -468,8 +473,11 @@ void warehouseLayoutMenu(WarehouseGraph& layout, navigationSystem& navigation, R
                     break;
                 }
 
-                layout.addLocation(id, name, type, x, y);
-                cout << "\nLocation " << id << " (" << name << ") added at (" << x << "," << y << ").\n";
+                if (layout.addLocation(id, name, type, x, y)) {
+                    cout << "\nLocation " << id << " (" << name << ") added at (" << x << "," << y << ").\n";
+                } else {
+                    cout << "Could not add the location.\n";
+                }
                 break;
             }
 
@@ -516,7 +524,9 @@ void warehouseLayoutMenu(WarehouseGraph& layout, navigationSystem& navigation, R
                          << "Robot Assignment module (Task 2).\n";
                     break;
                 }
-                layout.dispatchToRobot(navigation, robotID);
+                string destID = readWord("Enter the destination location ID: ");
+                for (char& c : destID) c = toupper(c);
+                layout.dispatchToRobot(navigation, robotID, destID);
                 break;
             }
 
@@ -553,8 +563,8 @@ int main() {
         cout << " Warehouse Robot System\n";
         cout << "====================================\n";
         cout << "1. Order Management (Task 1)\n";
-        cout << "2. Robot Navigation (Task 3)\n";
-        cout << "3. Robot Assignment (Task 2)\n";
+        cout << "2. Robot Assignment (Task 2)\n";
+        cout << "3. Robot Navigation (Task 3)\n";
         cout << "4. Item Management (Task 4)\n";
         cout << "5. Warehouse Layout (Task 5)\n";
         cout << "0. Exit\n";
@@ -573,9 +583,9 @@ int main() {
             case 1: 
                 orderMenu(orderManager); break;
             case 2: 
-                navigationMenu(navigation); break;
-            case 3: 
                 robotAssignmentMenu(assignment); break;
+            case 3: 
+                navigationMenu(navigation); break;
             case 4: 
                 itemManagementMenu(itemMgr); break; 
             case 5:
