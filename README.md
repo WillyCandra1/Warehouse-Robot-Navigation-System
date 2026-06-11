@@ -13,8 +13,6 @@
 
 The Warehouse Robot Navigation System simulates how an automated warehouse coordinates orders, robots, inventory, and physical layout. It is organised into **five independent modules**, each demonstrating a different data structure and its associated algorithms.
 
-The project was developed for **CT077-3-2 Data Structures** as a group prototype. A central rule of the assignment is that **no built-in container libraries** (`vector`, `list`, `map`, `queue`, `stack`, etc.) may be used — every data structure is implemented by hand.
-
 ---
 
 ## ✨ Modules & Features
@@ -142,7 +140,3 @@ A1,SA1,2
 Locations are `id,name,type,x,y`; connections are `from,to,weight`. The loader validates every line, so malformed data is skipped rather than crashing the program.
 
 ---
-
-## 📄 License & Academic Notice
-
-This repository is coursework submitted for **CT077-3-2 Data Structures** and is shared for educational and portfolio purposes. If you are a student, use it as a reference only and follow your institution's academic integrity policy.
